@@ -1,0 +1,11 @@
+.git
+.gitignore
+*.exe
+*.log
+ai.md
+doc
+tmp
+dist
+bin
+vendor
+config/config.toml

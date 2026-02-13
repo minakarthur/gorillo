@@ -1,0 +1,295 @@
+{{define "content"}}
+<div>
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-xl font-semibold text-gray-800">{{call .T "journal.title"}}</h1>
+        <div class="flex items-center space-x-4 text-sm">
+            {{/* Contest selector */}}
+            <label class="inline-flex items-center space-x-1">
+                <span class="text-gray-500">{{call .T "journal.contest"}}:</span>
+                <select id="contest-select" onchange="selectContest(this.value)"
+                        class="border rounded px-2 py-1 text-sm">
+                    <option value="0">{{call .T "journal.no_contest"}}</option>
+                    {{range .Contests}}
+                    <option value="{{.ID}}" {{if eqi .ID $.ContestID}}selected{{end}}>{{.Name}}</option>
+                    {{end}}
+                </select>
+            </label>
+            <span class="text-gray-300">|</span>
+            <span class="text-gray-500">{{call .T "journal.role"}}:</span>
+            <label class="inline-flex items-center space-x-1">
+                <input type="radio" name="role" value="tx" checked
+                       onchange="applyRole(this.value)" class="text-blue-600">
+                <span>{{call .T "journal.tx"}}</span>
+            </label>
+            <label class="inline-flex items-center space-x-1">
+                <input type="radio" name="role" value="rx"
+                       onchange="applyRole(this.value)" class="text-blue-600">
+                <span>{{call .T "journal.rx"}}</span>
+            </label>
+            <label class="inline-flex items-center space-x-1">
+                <input type="radio" name="role" value="swl"
+                       onchange="applyRole(this.value)" class="text-blue-600">
+                <span>{{call .T "journal.swl"}}</span>
+            </label>
+        </div>
+    </div>
+
+    {{/* Horizontal QSO form */}}
+    <form id="qso-form" hx-post="/journal" hx-target="#recent-body" hx-swap="afterbegin"
+          hx-on::after-request="if(event.detail.successful && event.detail.requestConfig && (event.detail.requestConfig.verb || '').toLowerCase() === 'post'){ resetForm(); }"
+          class="bg-white rounded-lg shadow-sm border p-4 mb-6">
+        <input type="hidden" name="contest_id" id="f-contest-id" value="{{.ContestID}}">
+        <div class="flex flex-wrap items-end gap-2">
+            {{/* Freq */}}
+            <div class="w-24">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.freq"}}</label>
+                <input type="text" name="freq" id="f-freq" list="f-freq-list"
+                       value="{{if .QSO}}{{.QSO.Freq}}{{end}}" placeholder="e.g. 14000"
+                       class="w-full border rounded px-2 py-1.5 text-sm {{if and .Errors (index .Errors "freq")}}field-error{{end}}">
+                <datalist id="f-freq-list">
+                    {{range .Freqs}}
+                    <option value="{{.}}">
+                    {{end}}
+                </datalist>
+            </div>
+            {{/* Mode */}}
+            <div class="w-20">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.mode"}}</label>
+                <select name="mode" id="f-mode"
+                        class="w-full border rounded px-2 py-1.5 text-sm {{if and .Errors (index .Errors "mode")}}field-error{{end}}">
+                    <option value="">—</option>
+                    {{range .Modes}}
+                    <option value="{{.}}" {{if and $.QSO (eqs $.QSO.Mode .)}}selected{{end}}>{{.}}</option>
+                    {{end}}
+                </select>
+            </div>
+            {{/* Date */}}
+            <div class="w-36">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.date"}} ({{tzName}})</label>
+                <input type="date" name="date" id="f-date"
+                       value="{{if .QSO}}{{.QSO.Date}}{{end}}"
+                       class="w-full border rounded px-2 py-1.5 text-sm {{if and .Errors (index .Errors "date")}}field-error{{end}}">
+            </div>
+            {{/* Time */}}
+            <div class="w-20">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.time"}}</label>
+                <input type="text" name="time" id="f-time" maxlength="4" placeholder="0000"
+                       value="{{if .QSO}}{{.QSO.Time}}{{end}}"
+                       class="w-full border rounded px-2 py-1.5 text-sm text-center {{if and .Errors (index .Errors "time")}}field-error{{end}}">
+            </div>
+            {{/* Sent Call */}}
+            <div class="w-32 relative">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.sent_call"}}</label>
+                <input type="text" name="sent_call" id="f-sent-call" autocomplete="off"
+                       value="{{if .QSO}}{{.QSO.SentCall}}{{end}}"
+                       hx-get="/api/callsigns" hx-trigger="keyup changed delay:300ms" hx-target="#suggest-sent"
+                       hx-params="*" hx-vals='{"q": ""}'
+                       oninput="this.value=this.value.toUpperCase(); htmx.ajax('GET','/api/callsigns?q='+this.value,{target:'#suggest-sent'})"
+                       class="w-full border rounded px-2 py-1.5 text-sm uppercase {{if and .Errors (index .Errors "sent_call")}}field-error{{end}}">
+                <div id="suggest-sent" class="suggest-dropdown w-full hidden"></div>
+            </div>
+            {{/* Sent RST */}}
+            <div class="w-16">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.rst"}}</label>
+                <input type="text" name="sent_rst" id="f-sent-rst" maxlength="3" value="59"
+                       class="w-full border rounded px-2 py-1.5 text-sm text-center">
+            </div>
+            {{/* Sent Exch */}}
+            <div class="w-24">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.sent_exch"}}</label>
+                <input type="text" name="sent_exch" id="f-sent-exch"
+                       value="{{if .QSO}}{{.QSO.SentExch}}{{end}}"
+                       class="w-full border rounded px-2 py-1.5 text-sm">
+            </div>
+            {{/* Rcvd Call */}}
+            <div class="w-32 relative">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.rcvd_call"}}</label>
+                <input type="text" name="rcvd_call" id="f-rcvd-call" autocomplete="off"
+                       value="{{if .QSO}}{{.QSO.RcvdCall}}{{end}}"
+                       oninput="this.value=this.value.toUpperCase(); htmx.ajax('GET','/api/callsigns?q='+this.value,{target:'#suggest-rcvd'})"
+                       class="w-full border rounded px-2 py-1.5 text-sm uppercase {{if and .Errors (index .Errors "rcvd_call")}}field-error{{end}}">
+                <div id="suggest-rcvd" class="suggest-dropdown w-full hidden"></div>
+            </div>
+            {{/* Rcvd RST */}}
+            <div class="w-16">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.rst"}}</label>
+                <input type="text" name="rcvd_rst" id="f-rcvd-rst" maxlength="3" value="59"
+                       class="w-full border rounded px-2 py-1.5 text-sm text-center">
+            </div>
+            {{/* Rcvd Exch */}}
+            <div class="w-24">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.rcvd_exch"}}</label>
+                <input type="text" name="rcvd_exch" id="f-rcvd-exch"
+                       value="{{if .QSO}}{{.QSO.RcvdExch}}{{end}}"
+                       class="w-full border rounded px-2 py-1.5 text-sm">
+            </div>
+            {{/* TX ID */}}
+            <div class="w-14">
+                <label class="block text-xs text-gray-500 mb-1">{{call .T "journal.tx_id"}}</label>
+                <select name="transmitter_id" class="w-full border rounded px-2 py-1.5 text-sm">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                </select>
+            </div>
+            {{/* Submit */}}
+            <div>
+                <button type="submit"
+                        class="bg-blue-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-blue-700 transition">
+                    {{call .T "journal.log_qso"}}
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {{/* Recent QSOs table */}}
+    <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                <tr>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.freq"}}</th>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.mode"}}</th>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.date"}}</th>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.time"}}</th>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.sent_call"}}</th>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.rst"}}</th>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.sent_exch"}}</th>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.rcvd_call"}}</th>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.rst"}}</th>
+                    <th class="px-3 py-2 text-left">{{call .T "journal.rcvd_exch"}}</th>
+                </tr>
+            </thead>
+            <tbody id="recent-body">
+                {{range .Recent}}
+                <tr class="border-t hover:bg-gray-50">
+                    <td class="px-3 py-1.5">{{.Freq}}</td>
+                    <td class="px-3 py-1.5">{{.Mode}}</td>
+                    <td class="px-3 py-1.5">{{localDate .Date .Time}}</td>
+                    <td class="px-3 py-1.5">{{localTime .Date .Time}}</td>
+                    <td class="px-3 py-1.5 font-mono {{if eqs .SentCall $.Owner.Callsign}}bg-blue-50 text-blue-700{{end}}">{{.SentCall}}</td>
+                    <td class="px-3 py-1.5">{{.SentRST}}</td>
+                    <td class="px-3 py-1.5">{{.SentExch}}</td>
+                    <td class="px-3 py-1.5 font-mono {{if eqs .RcvdCall $.Owner.Callsign}}bg-blue-50 text-blue-700{{end}}">{{.RcvdCall}}</td>
+                    <td class="px-3 py-1.5">{{.RcvdRST}}</td>
+                    <td class="px-3 py-1.5">{{.RcvdExch}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    const ownerCallsign = "{{.Owner.Callsign}}";
+    const tzOffsetMin = {{.TZOffset}};
+
+    function selectContest(id) {
+        document.getElementById('f-contest-id').value = id;
+        if (id && id !== '0') {
+            fetch('/api/contests/' + id)
+                .then(r => r.json())
+                .then(c => {
+                    if (c.freq) document.getElementById('f-freq').value = c.freq;
+                    if (c.mode) document.getElementById('f-mode').value = c.mode;
+                    if (c.sent_exch) document.getElementById('f-sent-exch').value = c.sent_exch;
+                });
+        }
+        // Update URL without reload
+        const url = new URL(window.location);
+        if (id && id !== '0') {
+            url.searchParams.set('contest_id', id);
+        } else {
+            url.searchParams.delete('contest_id');
+        }
+        history.replaceState(null, '', url);
+    }
+
+    function applyRole(role) {
+        const sentCall = document.getElementById('f-sent-call');
+        const rcvdCall = document.getElementById('f-rcvd-call');
+
+        if (sentCall.dataset.auto === "true") sentCall.value = '';
+        if (rcvdCall.dataset.auto === "true") rcvdCall.value = '';
+
+        sentCall.dataset.auto = "false";
+        rcvdCall.dataset.auto = "false";
+        sentCall.readOnly = false;
+        rcvdCall.readOnly = false;
+
+        if (role === 'tx' && ownerCallsign) {
+            sentCall.value = ownerCallsign;
+            sentCall.dataset.auto = "true";
+            sentCall.readOnly = true;
+        } else if (role === 'rx' && ownerCallsign) {
+            rcvdCall.value = ownerCallsign;
+            rcvdCall.dataset.auto = "true";
+            rcvdCall.readOnly = true;
+        }
+    }
+
+    function localNow() {
+        const now = new Date();
+        const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+        return new Date(utcMs + tzOffsetMin * 60000);
+    }
+
+    let timeManual = false;
+    let dateManual = false;
+
+    function resetForm() {
+        const freq = document.getElementById('f-freq').value;
+        const mode = document.getElementById('f-mode').value;
+        const contestId = document.getElementById('f-contest-id').value;
+        const sentExch = document.getElementById('f-sent-exch').value;
+
+        document.getElementById('f-time').value = '';
+        document.getElementById('f-sent-call').value = '';
+        document.getElementById('f-sent-rst').value = '59';
+        document.getElementById('f-sent-exch').value = '';
+        document.getElementById('f-rcvd-call').value = '';
+        document.getElementById('f-rcvd-rst').value = '59';
+        document.getElementById('f-rcvd-exch').value = '';
+
+        document.getElementById('f-freq').value = freq;
+        document.getElementById('f-mode').value = mode;
+        document.getElementById('f-contest-id').value = contestId;
+        // Keep sent_exch if contest is selected (it's a default)
+        if (contestId && contestId !== '0') {
+            document.getElementById('f-sent-exch').value = sentExch;
+        }
+
+        timeManual = false;
+        dateManual = false;
+        updateClock();
+
+        const role = document.querySelector('input[name="role"]:checked');
+        if (role) applyRole(role.value);
+    }
+
+    function updateClock() {
+        const now = localNow();
+        if (!timeManual) {
+            document.getElementById('f-time').value =
+                String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+        }
+        if (!dateManual) {
+            const y = now.getFullYear();
+            const m = String(now.getMonth()+1).padStart(2,'0');
+            const d = String(now.getDate()).padStart(2,'0');
+            document.getElementById('f-date').value = y + '-' + m + '-' + d;
+        }
+    }
+
+    function initForm() {
+        const role = document.querySelector('input[name="role"]:checked');
+        if (role) applyRole(role.value);
+
+        document.getElementById('f-time').addEventListener('input', () => { timeManual = true; });
+        document.getElementById('f-date').addEventListener('input', () => { dateManual = true; });
+
+        updateClock();
+        setInterval(updateClock, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', initForm);
+</script>
+{{end}}

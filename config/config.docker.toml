@@ -1,0 +1,12 @@
+[server]
+port = "8000"
+
+[database]
+host = "db"
+port = "3306"
+user = "gorillo"
+password = "gorillo"
+name = "gorillo"
+
+[journal]
+recent_count = 10

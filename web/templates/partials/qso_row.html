@@ -1,0 +1,14 @@
+{{define "qso_row.html"}}
+<tr class="border-t hover:bg-gray-50 bg-green-50" style="animation: fadeIn 0.3s ease">
+    <td class="px-3 py-1.5">{{.QSO.Freq}}</td>
+    <td class="px-3 py-1.5">{{.QSO.Mode}}</td>
+    <td class="px-3 py-1.5">{{localDate .QSO.Date .QSO.Time}}</td>
+    <td class="px-3 py-1.5">{{localTime .QSO.Date .QSO.Time}}</td>
+    <td class="px-3 py-1.5 font-mono {{if eqs .QSO.SentCall .OwnerCall}}bg-blue-50 text-blue-700{{end}}">{{.QSO.SentCall}}</td>
+    <td class="px-3 py-1.5">{{.QSO.SentRST}}</td>
+    <td class="px-3 py-1.5">{{.QSO.SentExch}}</td>
+    <td class="px-3 py-1.5 font-mono {{if eqs .QSO.RcvdCall .OwnerCall}}bg-blue-50 text-blue-700{{end}}">{{.QSO.RcvdCall}}</td>
+    <td class="px-3 py-1.5">{{.QSO.RcvdRST}}</td>
+    <td class="px-3 py-1.5">{{.QSO.RcvdExch}}</td>
+</tr>
+{{end}}

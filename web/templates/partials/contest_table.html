@@ -1,0 +1,171 @@
+{{define "contest_table.html"}}
+<div class="overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+            <tr>
+                <th class="px-2 py-2 text-left">Name</th>
+                <th class="px-2 py-2 text-left">Freq</th>
+                <th class="px-2 py-2 text-left">Mode</th>
+                <th class="px-2 py-2 text-left">Sent Exch</th>
+                <th class="px-2 py-2 text-left">Operator</th>
+                <th class="px-2 py-2 text-left">Band</th>
+                <th class="px-2 py-2 text-left">Power</th>
+                <th class="px-2 py-2 text-left">Station</th>
+                <th class="px-2 py-2 text-left">Assisted</th>
+                <th class="px-2 py-2 text-center"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Contests}}
+            <tr class="border-t hover:bg-gray-50" id="contest-{{.ID}}">
+                <td class="px-2 py-1.5 font-medium">{{.Name}}</td>
+                <td class="px-2 py-1.5">{{.Freq}}</td>
+                <td class="px-2 py-1.5">{{.Mode}}</td>
+                <td class="px-2 py-1.5">{{.SentExch}}</td>
+                <td class="px-2 py-1.5">{{.CategoryOperator}}</td>
+                <td class="px-2 py-1.5">{{.CategoryBand}}</td>
+                <td class="px-2 py-1.5">{{.CategoryPower}}</td>
+                <td class="px-2 py-1.5">{{.CategoryStation}}</td>
+                <td class="px-2 py-1.5">{{.CategoryAssisted}}</td>
+                <td class="px-2 py-1.5 text-right whitespace-nowrap">
+                    <button onclick="editContest({{.ID}})" class="text-blue-500 hover:text-blue-700 text-xs mr-2">Edit</button>
+                    <button hx-delete="/contests/{{.ID}}" hx-target="#contest-table" hx-swap="innerHTML"
+                            hx-confirm="Delete this contest?"
+                            class="text-red-400 hover:text-red-600 text-xs">Del</button>
+                </td>
+            </tr>
+            {{else}}
+            <tr><td colspan="10" class="px-3 py-4 text-center text-gray-400">No contests yet</td></tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>
+
+{{/* Add / Edit form */}}
+<form id="contest-form" hx-post="/contests" hx-target="#contest-table" hx-swap="innerHTML"
+      class="mt-4 border-t pt-4">
+    <input type="hidden" id="cf-id" name="id" value="">
+    <div class="grid grid-cols-4 gap-2">
+        <div class="col-span-2">
+            <input type="text" name="name" id="cf-name" placeholder="Contest name"
+                   class="w-full border rounded px-2 py-1.5 text-sm" required>
+        </div>
+        <div>
+            <select name="freq" id="cf-freq" class="w-full border rounded px-2 py-1.5 text-sm">
+                <option value="">Freq —</option>
+                {{range .Freqs}}<option value="{{.}}">{{.}}</option>{{end}}
+            </select>
+        </div>
+        <div>
+            <select name="mode" id="cf-mode" class="w-full border rounded px-2 py-1.5 text-sm">
+                <option value="">Mode —</option>
+                {{range .Modes}}<option value="{{.}}">{{.}}</option>{{end}}
+            </select>
+        </div>
+        <div>
+            <input type="text" name="sent_exch" id="cf-sent-exch" placeholder="Sent Exch"
+                   class="w-full border rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+            <input type="text" name="rcvd_exch" id="cf-rcvd-exch" placeholder="Rcvd Exch"
+                   class="w-full border rounded px-2 py-1.5 text-sm">
+        </div>
+        <div>
+            <select name="category_operator" id="cf-cat-op" class="w-full border rounded px-2 py-1.5 text-sm">
+                <option value="">Operator —</option>
+                <option value="SINGLE-OP">SINGLE-OP</option>
+                <option value="MULTI-OP">MULTI-OP</option>
+                <option value="CHECKLOG">CHECKLOG</option>
+            </select>
+        </div>
+        <div>
+            <select name="category_band" id="cf-cat-band" class="w-full border rounded px-2 py-1.5 text-sm">
+                <option value="">Band —</option>
+                <option value="ALL">ALL</option>
+                <option value="160M">160M</option><option value="80M">80M</option>
+                <option value="40M">40M</option><option value="20M">20M</option>
+                <option value="15M">15M</option><option value="10M">10M</option>
+                <option value="6M">6M</option><option value="2M">2M</option>
+            </select>
+        </div>
+        <div>
+            <select name="category_mode" id="cf-cat-mode" class="w-full border rounded px-2 py-1.5 text-sm">
+                <option value="">Cat Mode —</option>
+                <option value="CW">CW</option><option value="DIGI">DIGI</option>
+                <option value="FM">FM</option><option value="RTTY">RTTY</option>
+                <option value="SSB">SSB</option><option value="MIXED">MIXED</option>
+            </select>
+        </div>
+        <div>
+            <select name="category_power" id="cf-cat-power" class="w-full border rounded px-2 py-1.5 text-sm">
+                <option value="">Power —</option>
+                <option value="HIGH">HIGH</option>
+                <option value="LOW">LOW</option>
+                <option value="QRP">QRP</option>
+            </select>
+        </div>
+        <div>
+            <select name="category_station" id="cf-cat-station" class="w-full border rounded px-2 py-1.5 text-sm">
+                <option value="">Station —</option>
+                <option value="FIXED">FIXED</option><option value="MOBILE">MOBILE</option>
+                <option value="PORTABLE">PORTABLE</option><option value="ROVER">ROVER</option>
+                <option value="EXPEDITION">EXPEDITION</option><option value="HQ">HQ</option>
+                <option value="SCHOOL">SCHOOL</option>
+            </select>
+        </div>
+        <div>
+            <select name="category_assisted" id="cf-cat-assisted" class="w-full border rounded px-2 py-1.5 text-sm">
+                <option value="">Assisted —</option>
+                <option value="NON-ASSISTED">NON-ASSISTED</option>
+                <option value="ASSISTED">ASSISTED</option>
+            </select>
+        </div>
+    </div>
+    <div class="mt-2">
+        <button type="submit" id="cf-submit"
+                class="bg-green-600 text-white px-4 py-1.5 rounded text-sm font-medium hover:bg-green-700 transition">
+            Add Contest
+        </button>
+        <button type="button" id="cf-cancel" onclick="cancelEditContest()" class="hidden ml-2 text-gray-500 text-sm hover:text-gray-700">Cancel</button>
+    </div>
+</form>
+
+<script>
+function editContest(id) {
+    fetch('/api/contests/' + id)
+        .then(r => r.json())
+        .then(c => {
+            document.getElementById('cf-id').value = c.id;
+            document.getElementById('cf-name').value = c.name;
+            document.getElementById('cf-freq').value = c.freq;
+            document.getElementById('cf-mode').value = c.mode;
+            document.getElementById('cf-sent-exch').value = c.sent_exch;
+            document.getElementById('cf-rcvd-exch').value = c.rcvd_exch;
+            document.getElementById('cf-cat-op').value = c.category_operator;
+            document.getElementById('cf-cat-band').value = c.category_band;
+            document.getElementById('cf-cat-mode').value = c.category_mode;
+            document.getElementById('cf-cat-power').value = c.category_power;
+            document.getElementById('cf-cat-station').value = c.category_station;
+            document.getElementById('cf-cat-assisted').value = c.category_assisted;
+            // Switch form to PUT mode
+            const form = document.getElementById('contest-form');
+            form.setAttribute('hx-put', '/contests/' + id);
+            form.removeAttribute('hx-post');
+            htmx.process(form);
+            document.getElementById('cf-submit').textContent = 'Update';
+            document.getElementById('cf-cancel').classList.remove('hidden');
+        });
+}
+
+function cancelEditContest() {
+    const form = document.getElementById('contest-form');
+    form.reset();
+    document.getElementById('cf-id').value = '';
+    form.setAttribute('hx-post', '/contests');
+    form.removeAttribute('hx-put');
+    htmx.process(form);
+    document.getElementById('cf-submit').textContent = 'Add Contest';
+    document.getElementById('cf-cancel').classList.add('hidden');
+}
+</script>
+{{end}}

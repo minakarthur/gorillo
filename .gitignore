@@ -1,0 +1,15 @@
+bin/
+gorillo.exe
+gorillo
+
+config/config.toml
+
+.idea/
+.vscode/
+*.swp
+*.swo
+
+.DS_Store
+Thumbs.db
+
+vendor/

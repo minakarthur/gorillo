@@ -1,0 +1,47 @@
+{{define "content"}}
+<div>
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center space-x-4">
+            <h1 class="text-xl font-semibold text-gray-800">
+                {{call .T "logs.title"}}
+                <span class="text-sm font-normal text-gray-400 ml-2">{{.Total}} {{call .T "logs.records"}}</span>
+            </h1>
+            <label class="inline-flex items-center space-x-1 text-sm">
+                <span class="text-gray-500">{{call .T "logs.contest"}}</span>
+                <select onchange="filterByContest(this.value)" class="border rounded px-2 py-1 text-sm">
+                    <option value="0">{{call .T "logs.all_contests"}}</option>
+                    {{range .Contests}}
+                    <option value="{{.ID}}" {{if eqi .ID $.ContestID}}selected{{end}}>{{.Name}}</option>
+                    {{end}}
+                </select>
+            </label>
+        </div>
+        <a href="/export/cabrillo{{if .ContestID}}?contest_id={{.ContestID}}{{end}}"
+           id="export-link"
+           class="bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition">
+            {{call .T "logs.export"}}
+        </a>
+    </div>
+
+    <div id="logs-content" class="bg-white rounded-lg shadow-sm border overflow-hidden">
+        {{template "logs_table.html" .}}
+    </div>
+</div>
+<script>
+function filterByContest(id) {
+    const url = id && id !== '0' ? '/logs?contest_id=' + id : '/logs';
+    htmx.ajax('GET', url, {target: '#logs-content', swap: 'innerHTML'});
+    // Update export link
+    const exportLink = document.getElementById('export-link');
+    exportLink.href = id && id !== '0' ? '/export/cabrillo?contest_id=' + id : '/export/cabrillo';
+    // Update browser URL
+    const newUrl = new URL(window.location);
+    if (id && id !== '0') {
+        newUrl.searchParams.set('contest_id', id);
+    } else {
+        newUrl.searchParams.delete('contest_id');
+    }
+    history.replaceState(null, '', newUrl);
+}
+</script>
+{{end}}

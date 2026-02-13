@@ -1,0 +1,13 @@
+[server]
+port = "8000"
+
+[database]
+host = "127.0.0.1"
+port = "3306"
+user = "root"
+password = ""
+name = "gorillo"
+
+[journal]
+# Number of recent QSO entries shown below the form
+recent_count = 10

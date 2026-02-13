@@ -1,0 +1,86 @@
+{{define "content"}}
+<div class="max-w-4xl">
+    <h1 class="text-xl font-semibold text-gray-800 mb-4">{{call .T "settings.title"}}</h1>
+
+    <form hx-put="/settings" hx-target="#save-status" hx-swap="innerHTML" class="space-y-6">
+
+        {{/* Station Info */}}
+        <div class="bg-white rounded-lg shadow-sm border p-5">
+            <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">{{call .T "settings.station_info"}}</h2>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.callsign"}}</label>
+                    <input type="text" name="callsign" value="{{.Owner.Callsign}}"
+                           class="w-full border rounded-md px-3 py-2 text-sm uppercase" placeholder="e.g. W1AW">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.name"}}</label>
+                    <input type="text" name="name" value="{{.Owner.Name}}"
+                           class="w-full border rounded-md px-3 py-2 text-sm" placeholder="Your name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.email"}}</label>
+                    <input type="email" name="email" value="{{.Owner.Email}}"
+                           class="w-full border rounded-md px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.grid_locator"}}</label>
+                    <input type="text" name="grid_locator" value="{{.Owner.GridLocator}}"
+                           class="w-full border rounded-md px-3 py-2 text-sm uppercase" placeholder="e.g. FN42">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.location"}}</label>
+                    <input type="text" name="location" value="{{.Owner.Location}}"
+                           class="w-full border rounded-md px-3 py-2 text-sm" placeholder="e.g. CT or DX">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.club"}}</label>
+                    <input type="text" name="club" value="{{.Owner.Club}}"
+                           class="w-full border rounded-md px-3 py-2 text-sm">
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.address"}}</label>
+                    <textarea name="address" rows="3"
+                              class="w-full border rounded-md px-3 py-2 text-sm">{{.Owner.Address}}</textarea>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.operators"}}</label>
+                    <input type="text" name="operators" value="{{.Owner.Operators}}"
+                           class="w-full border rounded-md px-3 py-2 text-sm" placeholder="K1ABC N5XYZ @N6IJ">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.timezone"}}</label>
+                    <select name="timezone" class="w-full border rounded-md px-3 py-2 text-sm">
+                        {{range .Timezones}}
+                        <option value="{{.}}" {{if eqs . $.SelectedTimezone}}selected{{end}}>{{.}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">{{call .T "settings.language"}}</label>
+                    <select name="language" class="w-full border rounded-md px-3 py-2 text-sm">
+                        <option value="en" {{if eqs .Owner.Language "en"}}selected{{end}}>English</option>
+                        <option value="ru" {{if eqs .Owner.Language "ru"}}selected{{end}}>Русский</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <button type="submit"
+                    class="bg-blue-600 text-white px-5 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition">
+                {{call .T "settings.save"}}
+            </button>
+            <div id="save-status"></div>
+        </div>
+    </form>
+
+    {{/* Contests CRUD Table */}}
+    <div class="mt-8 bg-white rounded-lg shadow-sm border p-5">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">{{call .T "settings.contests"}}</h2>
+        <div id="contest-table">
+            {{template "contest_table.html" .}}
+        </div>
+    </div>
+</div>
+{{end}}

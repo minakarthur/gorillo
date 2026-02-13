@@ -1,0 +1,43 @@
+https://wwrof.org/cabrillo/cabrillo-specification-notes/
+
+Cabrillo Specification Notes
+This page is intended to provide information for developers that are creating software to output or read Cabrillo format log files.
+
+The goal of the Cabrillo summary sheet information is for the contest participant to describe the nature of his participation in the contest. It is the responsibility of the contest sponsor to assign a valid contest category based on the attributes of the operation.
+
+Cabrillo V3 is intended to be backward compatible with previous versions of Cabrillo. Therefore if people submit logs that were created by Cabrillo v2-compliant loggers, their logs will still be accepted by Cabrillo v3 email robots.
+
+The Cabrillo format for Sweepstakes looks like this:
+
+QSO: 14042 CW 1997-11-03 0101 N5KO       1211 B 74 SCV KA5WSS/VE3 1071 A 74 ON
+QSO: 14042 CW 1997-11-03 0102 N5KO       1212 B 74 SCV NJ2L       1122 B 81 WNY
+QSO: 14042 CW 1997-11-03 0102 N5KO       1213 B 74 SCV K9ZO        902 A 69 IL
+You will note the examples use fixed columns and are space delimited. This is to make it both human and robot readable. However, in the case of a field overflow, the information should be truncated so that it fits into the field and doesn’t disrupt data in other columns, so a call like KA5WSS/ARRL-JUBILEE would appear like this:
+
+QSO: 14042 CW 1997-11-03 0101 N5KO     1211 B 74 SCV KA5WSS/ARR 1071 A 74 ON 
+QSO: 14042 CW 1997-11-03 0102 N5KO     1212 B 74 SCV NJ2L       1122 B 81 WNY 
+QSO: 14042 CW 1997-11-03 0102 N5KO     1213 B 74 SCV K9ZO        902 A 69 IL 
+While the specification implies fixed columns for all data, this is not a requirement.  Most contest sponsors accept any space or tab character as a delimiter between data. The major contest sponsors such as CQ and ARRL do accept space or tab as a delimiter. I.e., data does not need to be in specific columns.
+
+One goal is to make the logs and summary sheets easy to read by both humans and by computers. The most appropriate non-printable characters in a log submission should be SPACE and the appropriate text end-of-line sequence for the platform the logging program runs on, such as CR/LF for DOS.
+
+CLAIMED-SCORE is included so that a High Claimed Scores report may be generated. Line score data such a QSOs, QSO points, multipliers, on-time and off-time will be computed during the log checking process.
+
+CLUB, OPERATORS, SOAPBOX, and ADDRESS lines may appear multiple times with different data, as shown. Please limit the number of ADDRESS: lines to a total count of four so that the name and address may be fit onto a standard mailing label.
+
+NAME: Trey Garlough
+ADDRESS: 7375 Oak Ridge Road
+ADDRESS: Aptos, CA 95003
+ADDRESS: USA
+Other types of lines may only appear once.
+
+If no soapbox is entered into the logging program, please write out something like
+
+SOAPBOX:
+SOAPBOX:
+so that people will get the right idea if they decide to edit the file by hand. Same thing applies to NAME, ADDRESS, CLUB, and OPERATORS.
+
+The OPERATORS field is a space-delimited list of operator callsign(s). You may also list the callsign of the host station by placing an “@” character in front of the callsign within the operator list. KH6ND operating from KH7R’s QTH as KH7X could describe this situation in his Cabrillo file like this
+
+CALLSIGN: KH7X
+OPERATORS: KH6ND @KH7R

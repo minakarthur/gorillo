@@ -1,0 +1,64 @@
+{{define "logs_table.html"}}
+<table class="w-full text-sm">
+    <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+        <tr>
+            <th class="px-3 py-2 text-left">#</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.freq"}}</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.mode"}}</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.date"}}</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.time"}}</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.sent_call"}}</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.rst"}}</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.sent_exch"}}</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.rcvd_call"}}</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.rst"}}</th>
+            <th class="px-3 py-2 text-left">{{call .T "journal.rcvd_exch"}}</th>
+            <th class="px-3 py-2 text-center">{{call .T "journal.tx_id"}}</th>
+            <th class="px-3 py-2"></th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .QSOs}}
+        <tr id="qso-{{.ID}}" class="border-t hover:bg-gray-50">
+            <td class="px-3 py-1.5 text-gray-400">{{.ID}}</td>
+            <td class="px-3 py-1.5">{{.Freq}}</td>
+            <td class="px-3 py-1.5">{{.Mode}}</td>
+            <td class="px-3 py-1.5">{{localDate .Date .Time}}</td>
+            <td class="px-3 py-1.5">{{localTime .Date .Time}}</td>
+            <td class="px-3 py-1.5 font-mono">{{.SentCall}}</td>
+            <td class="px-3 py-1.5">{{.SentRST}}</td>
+            <td class="px-3 py-1.5">{{.SentExch}}</td>
+            <td class="px-3 py-1.5 font-mono">{{.RcvdCall}}</td>
+            <td class="px-3 py-1.5">{{.RcvdRST}}</td>
+            <td class="px-3 py-1.5">{{.RcvdExch}}</td>
+            <td class="px-3 py-1.5 text-center">{{.TransmitterID}}</td>
+            <td class="px-3 py-1.5 text-right">
+                <button hx-delete="/logs?id={{.ID}}" hx-target="#qso-{{.ID}}" hx-swap="outerHTML"
+                        class="text-red-400 hover:text-red-600 text-xs">{{call $.T "logs.delete"}}</button>
+            </td>
+        </tr>
+        {{else}}
+        <tr><td colspan="13" class="px-3 py-8 text-center text-gray-400">{{call .T "logs.no_records"}}</td></tr>
+        {{end}}
+    </tbody>
+</table>
+
+{{if gt .TotalPages 1}}
+<div class="flex items-center justify-center space-x-1 py-3 border-t bg-gray-50">
+    {{if gt .Page 1}}
+    <a hx-get="/logs?page={{sub .Page 1}}{{if .ContestID}}&contest_id={{.ContestID}}{{end}}" hx-target="#logs-content" hx-swap="innerHTML"
+       class="px-3 py-1 rounded text-sm text-gray-600 hover:bg-gray-200 cursor-pointer">&laquo; {{call .T "logs.prev"}}</a>
+    {{end}}
+
+    {{range $p := seq 1 .TotalPages}}
+    <a hx-get="/logs?page={{$p}}{{if $.ContestID}}&contest_id={{$.ContestID}}{{end}}" hx-target="#logs-content" hx-swap="innerHTML"
+       class="px-3 py-1 rounded text-sm cursor-pointer {{if eqi $p $.Page}}bg-blue-600 text-white{{else}}text-gray-600 hover:bg-gray-200{{end}}">{{$p}}</a>
+    {{end}}
+
+    {{if lt .Page .TotalPages}}
+    <a hx-get="/logs?page={{add .Page 1}}{{if .ContestID}}&contest_id={{.ContestID}}{{end}}" hx-target="#logs-content" hx-swap="innerHTML"
+       class="px-3 py-1 rounded text-sm text-gray-600 hover:bg-gray-200 cursor-pointer">{{call .T "logs.next"}} &raquo;</a>
+    {{end}}
+</div>
+{{end}}
+{{end}}
