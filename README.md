@@ -31,6 +31,17 @@ docker compose up --build
 
 Then open `http://localhost:8000`.
 
+### Docker Hub Image
+
+Use the published image `minakarthur/gorillo`
+
+```bash
+docker pull minakarthur/gorillo
+docker run -d --name gorillo -p 8000:8000 minakarthur/gorillo
+```
+
+Then open `http://localhost:8000`.
+
 ## Screenshots
 
 ### Journal
@@ -95,3 +106,4 @@ QSO:  7000 PH 2026-02-13 1220 W1AW         59  CT     K3LR          59  PA     1
 QSO: 21000 CW 2026-02-13 1228 W1AW         599 CT     JA1NUT        599 25     0
 END-OF-LOG:
 ```
+
