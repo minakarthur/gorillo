@@ -18,11 +18,7 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
-	Host     string `toml:"host"`
-	Port     string `toml:"port"`
-	User     string `toml:"user"`
-	Password string `toml:"password"`
-	Name     string `toml:"name"`
+	Path string `toml:"path"`
 }
 
 type JournalConfig struct {
@@ -32,7 +28,7 @@ type JournalConfig struct {
 func Load(path string) (*Config, error) {
 	cfg := &Config{
 		Server:   ServerConfig{Port: "8000"},
-		Database: DatabaseConfig{Host: "127.0.0.1", Port: "3306", User: "root", Name: "gorillo"},
+		Database: DatabaseConfig{Path: "gorillo.db"},
 		Journal:  JournalConfig{RecentCount: 10},
 	}
 
@@ -53,6 +49,5 @@ func Load(path string) (*Config, error) {
 }
 
 func (c *Config) DSN() string {
-	d := c.Database
-	return d.User + ":" + d.Password + "@tcp(" + d.Host + ":" + d.Port + ")/" + d.Name + "?parseTime=true&charset=utf8mb4"
+	return c.Database.Path
 }

@@ -2,11 +2,7 @@
 port = "8000"
 
 [database]
-host = "db"
-port = "3306"
-user = "gorillo"
-password = "gorillo"
-name = "gorillo"
+path = "/app/data/gorillo.db"
 
 [journal]
 recent_count = 10

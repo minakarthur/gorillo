@@ -9,67 +9,67 @@ import (
 func Migrate(db *sqlx.DB) error {
 	queries := []string{
 		`CREATE TABLE IF NOT EXISTS owners (
-			id INT PRIMARY KEY AUTO_INCREMENT,
-			callsign VARCHAR(20) NOT NULL DEFAULT '',
-			name VARCHAR(75) NOT NULL DEFAULT '',
-			email VARCHAR(255) NOT NULL DEFAULT '',
-			grid_locator VARCHAR(8) NOT NULL DEFAULT '',
-			location VARCHAR(50) NOT NULL DEFAULT '',
-			club VARCHAR(75) NOT NULL DEFAULT '',
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			callsign TEXT NOT NULL DEFAULT '',
+			name TEXT NOT NULL DEFAULT '',
+			email TEXT NOT NULL DEFAULT '',
+			grid_locator TEXT NOT NULL DEFAULT '',
+			location TEXT NOT NULL DEFAULT '',
+			club TEXT NOT NULL DEFAULT '',
 			address TEXT,
-			operators VARCHAR(255) NOT NULL DEFAULT '',
-			contest VARCHAR(32) NOT NULL DEFAULT '',
-			category_operator VARCHAR(20) NOT NULL DEFAULT '',
-			category_band VARCHAR(20) NOT NULL DEFAULT '',
-			category_mode VARCHAR(10) NOT NULL DEFAULT '',
-			category_power VARCHAR(10) NOT NULL DEFAULT '',
-			category_station VARCHAR(20) NOT NULL DEFAULT '',
-			category_assisted VARCHAR(20) NOT NULL DEFAULT ''
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+			operators TEXT NOT NULL DEFAULT '',
+			contest TEXT NOT NULL DEFAULT '',
+			category_operator TEXT NOT NULL DEFAULT '',
+			category_band TEXT NOT NULL DEFAULT '',
+			category_mode TEXT NOT NULL DEFAULT '',
+			category_power TEXT NOT NULL DEFAULT '',
+			category_station TEXT NOT NULL DEFAULT '',
+			category_assisted TEXT NOT NULL DEFAULT ''
+		)`,
 
 		`CREATE TABLE IF NOT EXISTS qso_logs (
-			id BIGINT PRIMARY KEY AUTO_INCREMENT,
-			freq VARCHAR(10) NOT NULL,
-			mode VARCHAR(5) NOT NULL,
-			date DATE NOT NULL,
-			time VARCHAR(4) NOT NULL,
-			sent_call VARCHAR(20) NOT NULL,
-			sent_rst VARCHAR(5) NOT NULL DEFAULT '59',
-			sent_exch VARCHAR(50) NOT NULL DEFAULT '',
-			rcvd_call VARCHAR(20) NOT NULL,
-			rcvd_rst VARCHAR(5) NOT NULL DEFAULT '59',
-			rcvd_exch VARCHAR(50) NOT NULL DEFAULT '',
-			transmitter_id TINYINT NOT NULL DEFAULT 0,
-			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			INDEX idx_date_time (date, time),
-			INDEX idx_sent_call (sent_call),
-			INDEX idx_rcvd_call (rcvd_call)
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			freq TEXT NOT NULL,
+			mode TEXT NOT NULL,
+			date TEXT NOT NULL,
+			time TEXT NOT NULL,
+			sent_call TEXT NOT NULL,
+			sent_rst TEXT NOT NULL DEFAULT '59',
+			sent_exch TEXT NOT NULL DEFAULT '',
+			rcvd_call TEXT NOT NULL,
+			rcvd_rst TEXT NOT NULL DEFAULT '59',
+			rcvd_exch TEXT NOT NULL DEFAULT '',
+			transmitter_id INTEGER NOT NULL DEFAULT 0,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+		)`,
 
-		`INSERT IGNORE INTO owners (id, callsign) VALUES (1, '')`,
+		`CREATE INDEX IF NOT EXISTS idx_date_time ON qso_logs (date, time)`,
+		`CREATE INDEX IF NOT EXISTS idx_sent_call ON qso_logs (sent_call)`,
+		`CREATE INDEX IF NOT EXISTS idx_rcvd_call ON qso_logs (rcvd_call)`,
+
+		`INSERT OR IGNORE INTO owners (id, callsign) VALUES (1, '')`,
 
 		`CREATE TABLE IF NOT EXISTS contests (
-			id INT PRIMARY KEY AUTO_INCREMENT,
-			name VARCHAR(100) NOT NULL DEFAULT '',
-			sent_exch VARCHAR(50) NOT NULL DEFAULT '',
-			rcvd_exch VARCHAR(50) NOT NULL DEFAULT '',
-			freq VARCHAR(10) NOT NULL DEFAULT '',
-			mode VARCHAR(5) NOT NULL DEFAULT '',
-			category_operator VARCHAR(20) NOT NULL DEFAULT '',
-			category_band VARCHAR(20) NOT NULL DEFAULT '',
-			category_mode VARCHAR(10) NOT NULL DEFAULT '',
-			category_power VARCHAR(10) NOT NULL DEFAULT '',
-			category_station VARCHAR(20) NOT NULL DEFAULT '',
-			category_assisted VARCHAR(20) NOT NULL DEFAULT '',
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL DEFAULT '',
+			sent_exch TEXT NOT NULL DEFAULT '',
+			rcvd_exch TEXT NOT NULL DEFAULT '',
+			freq TEXT NOT NULL DEFAULT '',
+			mode TEXT NOT NULL DEFAULT '',
+			category_operator TEXT NOT NULL DEFAULT '',
+			category_band TEXT NOT NULL DEFAULT '',
+			category_mode TEXT NOT NULL DEFAULT '',
+			category_power TEXT NOT NULL DEFAULT '',
+			category_station TEXT NOT NULL DEFAULT '',
+			category_assisted TEXT NOT NULL DEFAULT '',
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+		)`,
 	}
 
 	alters := []string{
-		`ALTER TABLE qso_logs ADD COLUMN contest_id INT DEFAULT NULL`,
-		`ALTER TABLE qso_logs ADD INDEX idx_contest_id (contest_id)`,
-		`ALTER TABLE owners ADD COLUMN timezone VARCHAR(50) NOT NULL DEFAULT 'UTC'`,
-		`ALTER TABLE owners ADD COLUMN language VARCHAR(5) NOT NULL DEFAULT 'en'`,
+		`ALTER TABLE qso_logs ADD COLUMN contest_id INTEGER DEFAULT NULL`,
+		`ALTER TABLE owners ADD COLUMN timezone TEXT NOT NULL DEFAULT 'UTC'`,
+		`ALTER TABLE owners ADD COLUMN language TEXT NOT NULL DEFAULT 'en'`,
 	}
 
 	for _, q := range queries {
@@ -81,6 +81,8 @@ func Migrate(db *sqlx.DB) error {
 	for _, q := range alters {
 		db.Exec(q) // ignore "duplicate column" errors
 	}
+
+	db.Exec(`CREATE INDEX IF NOT EXISTS idx_contest_id ON qso_logs (contest_id)`)
 
 	migrateContestData(db)
 

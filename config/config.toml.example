@@ -2,11 +2,7 @@
 port = "8000"
 
 [database]
-host = "127.0.0.1"
-port = "3306"
-user = "root"
-password = ""
-name = "gorillo"
+path = "gorillo.db"
 
 [journal]
 # Number of recent QSO entries shown below the form

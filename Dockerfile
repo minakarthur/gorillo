@@ -10,6 +10,7 @@ COPY web ./web
 COPY config ./config
 
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -tags timetzdata -ldflags="-s -w" -o /out/gorillo ./cmd/gorillo
+RUN mkdir -p /out/data
 
 FROM scratch
 WORKDIR /app
@@ -17,6 +18,7 @@ WORKDIR /app
 COPY --from=builder /out/gorillo /app/gorillo
 COPY --from=builder /src/web /app/web
 COPY --from=builder /src/config/config.docker.toml /app/config/config.toml
+COPY --from=builder /out/data /app/data
 
 EXPOSE 8000
 

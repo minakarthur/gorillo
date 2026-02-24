@@ -46,7 +46,7 @@ func Export(w io.Writer, owner *models.Owner, contest *models.Contest, qsos []mo
 		lines = append(lines, "OPERATORS: "+owner.Operators)
 	}
 
-	lines = append(lines, "CREATED-BY: Gorillo v1.0")
+	lines = append(lines, "CREATED-BY: Gorillo v1.3")
 	lines = append(lines, "SOAPBOX:")
 
 	for _, q := range qsos {
