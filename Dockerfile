@@ -16,7 +16,6 @@ FROM scratch
 WORKDIR /app
 
 COPY --from=builder /out/gorillo /app/gorillo
-COPY --from=builder /src/web /app/web
 COPY --from=builder /src/config/config.docker.yaml /app/config/config.yaml
 COPY --from=builder /out/data /app/data
 

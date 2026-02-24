@@ -1,25 +1,26 @@
 package handlers
 
 import (
-	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"net/http"
 	"path/filepath"
 	"strings"
 	"sync"
 	"time"
+	"fmt"
 )
 
 type TemplateRenderer struct {
-	dir       string
+	fsys      fs.FS
 	templates map[string]*template.Template
 	mu        sync.RWMutex
 	funcMap   template.FuncMap
 	locFn     func() *time.Location
 }
 
-func NewTemplateRenderer(dir string, locFn func() *time.Location) *TemplateRenderer {
+func NewTemplateRenderer(fsys fs.FS, locFn func() *time.Location) *TemplateRenderer {
 	toLocal := func(d time.Time, t string) time.Time {
 		h, m := 0, 0
 		if len(t) >= 4 {
@@ -30,7 +31,7 @@ func NewTemplateRenderer(dir string, locFn func() *time.Location) *TemplateRende
 	}
 
 	return &TemplateRenderer{
-		dir:       dir,
+		fsys:      fsys,
 		templates: make(map[string]*template.Template),
 		locFn:     locFn,
 		funcMap: template.FuncMap{
@@ -76,39 +77,35 @@ func NewTemplateRenderer(dir string, locFn func() *time.Location) *TemplateRende
 }
 
 func (tr *TemplateRenderer) Load() error {
-	layout := filepath.Join(tr.dir, "layout.html")
-	logsTable := filepath.Join(tr.dir, "logs_table.html")
+	layout := "templates/layout.html"
+	logsTable := "templates/logs_table.html"
+	contestTable := "templates/partials/contest_table.html"
 
-	contestTable := filepath.Join(tr.dir, "partials", "contest_table.html")
-
-	// journal.html - standalone page
-	journalT, err := template.New("").Funcs(tr.funcMap).ParseFiles(layout, filepath.Join(tr.dir, "journal.html"))
+	journalT, err := template.New("").Funcs(tr.funcMap).ParseFS(tr.fsys, layout, "templates/journal.html")
 	if err != nil {
 		return err
 	}
 	tr.templates["journal.html"] = journalT
 
-	// settings.html includes contest_table.html sub-template
-	settingsT, err := template.New("").Funcs(tr.funcMap).ParseFiles(layout, filepath.Join(tr.dir, "settings.html"), contestTable)
+	settingsT, err := template.New("").Funcs(tr.funcMap).ParseFS(tr.fsys, layout, "templates/settings.html", contestTable)
 	if err != nil {
 		return err
 	}
 	tr.templates["settings.html"] = settingsT
 
-	// logs.html includes logs_table.html sub-template
-	logsT, err := template.New("").Funcs(tr.funcMap).ParseFiles(layout, filepath.Join(tr.dir, "logs.html"), logsTable)
+	logsT, err := template.New("").Funcs(tr.funcMap).ParseFS(tr.fsys, layout, "templates/logs.html", logsTable)
 	if err != nil {
 		return err
 	}
 	tr.templates["logs.html"] = logsT
 
 	partialFiles := map[string]string{
-		"logs_table.html":            filepath.Join(tr.dir, "logs_table.html"),
-		"partials/qso_row.html":      filepath.Join(tr.dir, "partials", "qso_row.html"),
-		"partials/contest_table.html": filepath.Join(tr.dir, "partials", "contest_table.html"),
+		"logs_table.html":             "templates/logs_table.html",
+		"partials/qso_row.html":       "templates/partials/qso_row.html",
+		"partials/contest_table.html": "templates/partials/contest_table.html",
 	}
 	for key, path := range partialFiles {
-		t, err := template.New("").Funcs(tr.funcMap).ParseFiles(path)
+		t, err := template.New("").Funcs(tr.funcMap).ParseFS(tr.fsys, path)
 		if err != nil {
 			return err
 		}

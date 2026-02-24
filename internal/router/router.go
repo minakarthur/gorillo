@@ -1,6 +1,7 @@
 package router
 
 import (
+	"io/fs"
 	"net/http"
 
 	"github.com/engine/gorillo/internal/config"
@@ -10,14 +11,13 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func New(db *sqlx.DB, tmpl *handlers.TemplateRenderer, staticDir string, cfg *config.Config) http.Handler {
+func New(db *sqlx.DB, tmpl *handlers.TemplateRenderer, staticFS fs.FS, cfg *config.Config) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
 	// Static files
-	fs := http.FileServer(http.Dir(staticDir))
-	r.Handle("/static/*", http.StripPrefix("/static/", fs))
+	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
 
 	journal := handlers.NewJournalHandler(db, tmpl, cfg.Journal.RecentCount)
 	logs := handlers.NewLogsHandler(db, tmpl)

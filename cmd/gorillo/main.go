@@ -1,9 +1,9 @@
 package main
 
 import (
+	"io/fs"
 	"log"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -13,6 +13,7 @@ import (
 	"github.com/engine/gorillo/internal/database"
 	"github.com/engine/gorillo/internal/handlers"
 	"github.com/engine/gorillo/internal/router"
+	"github.com/engine/gorillo/web"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -32,16 +33,14 @@ func main() {
 		log.Fatalf("Failed to run migrations: %v", err)
 	}
 
-	webDir := "web"
-
 	locFn := cachedLocationFunc(db)
-	tmpl := handlers.NewTemplateRenderer(filepath.Join(webDir, "templates"), locFn)
+	tmpl := handlers.NewTemplateRenderer(web.FS, locFn)
 	if err := tmpl.Load(); err != nil {
 		log.Fatalf("Failed to load templates: %v", err)
 	}
 
-	staticDir := filepath.Join(webDir, "static")
-	mux := router.New(db, tmpl, staticDir, cfg)
+	staticFS, _ := fs.Sub(web.FS, "static")
+	mux := router.New(db, tmpl, staticFS, cfg)
 
 	log.Printf("Gorillo starting on http://localhost:%s", cfg.Server.Port)
 	if err := http.ListenAndServe(":"+cfg.Server.Port, mux); err != nil {
