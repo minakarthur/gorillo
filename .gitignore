@@ -1,6 +1,9 @@
 bin/
 
-config/config.toml
+config/config.yaml
+*.db
+*.db-shm
+*.db-wal
 
 .idea/
 .vscode/
