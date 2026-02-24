@@ -3,9 +3,9 @@ module github.com/engine/gorillo
 go 1.25.7
 
 require (
-	github.com/BurntSushi/toml v1.6.0
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/jmoiron/sqlx v1.4.0
+	gopkg.in/yaml.v3 v3.0.1
 	modernc.org/sqlite v1.46.1
 )
 

@@ -1,0 +1,8 @@
+server:
+  port: "8000"
+
+database:
+  path: /app/data/gorillo.db
+
+journal:
+  recent_count: 10

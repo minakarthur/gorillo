@@ -13,15 +13,14 @@ Gorillo is a lightweight web app for logging amateur radio QSOs, managing contes
 
 ### Local
 
-1. Create `config/config.toml` from `config/config.toml.example`.
-2. Start MySQL and create the `gorillo` database.
-3. Run:
+1. Create `config/config.yaml` from `config/config.yaml.example`.
+2. Run:
 
 ```bash
 go run ./cmd/gorillo
 ```
 
-4. Open `http://localhost:8000`.
+3. Open `http://localhost:8000`.
 
 ### Docker
 

@@ -4,25 +4,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/BurntSushi/toml"
+	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Server   ServerConfig   `toml:"server"`
-	Database DatabaseConfig `toml:"database"`
-	Journal  JournalConfig  `toml:"journal"`
+	Server   ServerConfig   `yaml:"server"`
+	Database DatabaseConfig `yaml:"database"`
+	Journal  JournalConfig  `yaml:"journal"`
 }
 
 type ServerConfig struct {
-	Port string `toml:"port"`
+	Port string `yaml:"port"`
 }
 
 type DatabaseConfig struct {
-	Path string `toml:"path"`
+	Path string `yaml:"path"`
 }
 
 type JournalConfig struct {
-	RecentCount int `toml:"recent_count"`
+	RecentCount int `yaml:"recent_count"`
 }
 
 func Load(path string) (*Config, error) {
@@ -37,7 +37,7 @@ func Load(path string) (*Config, error) {
 		return nil, fmt.Errorf("read config %s: %w", path, err)
 	}
 
-	if err := toml.Unmarshal(data, cfg); err != nil {
+	if err := yaml.Unmarshal(data, cfg); err != nil {
 		return nil, fmt.Errorf("parse config: %w", err)
 	}
 

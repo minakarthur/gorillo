@@ -17,7 +17,7 @@ WORKDIR /app
 
 COPY --from=builder /out/gorillo /app/gorillo
 COPY --from=builder /src/web /app/web
-COPY --from=builder /src/config/config.docker.toml /app/config/config.toml
+COPY --from=builder /src/config/config.docker.yaml /app/config/config.yaml
 COPY --from=builder /out/data /app/data
 
 EXPOSE 8000

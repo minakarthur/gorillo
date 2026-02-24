@@ -1,0 +1,9 @@
+server:
+  port: "8000"
+
+database:
+  path: gorillo.db
+
+journal:
+  # Number of recent QSO entries shown below the form
+  recent_count: 10
