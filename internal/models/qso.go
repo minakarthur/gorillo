@@ -14,7 +14,6 @@ type QSO struct {
 	RcvdCall      string    `db:"rcvd_call"`
 	RcvdRST       string    `db:"rcvd_rst"`
 	RcvdExch      string    `db:"rcvd_exch"`
-	TransmitterID int       `db:"transmitter_id"`
-	ContestID     *int      `db:"contest_id"`
-	CreatedAt     time.Time `db:"created_at"`
+	TransmitterID int  `db:"transmitter_id"`
+	ContestID     *int `db:"contest_id"`
 }

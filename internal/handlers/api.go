@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"html"
 	"net/http"
 	"strings"
 
@@ -38,9 +39,9 @@ func (h *APIHandler) CallsignSuggest(w http.ResponseWriter, r *http.Request) {
 	var sb strings.Builder
 	for _, c := range calls {
 		sb.WriteString(`<div class="suggest-item px-3 py-1 cursor-pointer hover:bg-blue-100" data-value="`)
-		sb.WriteString(c)
+		sb.WriteString(html.EscapeString(c))
 		sb.WriteString(`">`)
-		sb.WriteString(c)
+		sb.WriteString(html.EscapeString(c))
 		sb.WriteString(`</div>`)
 	}
 

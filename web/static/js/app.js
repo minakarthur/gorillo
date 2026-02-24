@@ -1,6 +1,4 @@
-// Callsign autocomplete dropdown handling
 document.addEventListener('click', function(e) {
-    // Handle suggestion clicks
     if (e.target.classList.contains('suggest-item')) {
         const input = e.target.closest('.relative').querySelector('input');
         if (input) {
@@ -11,13 +9,11 @@ document.addEventListener('click', function(e) {
         return;
     }
 
-    // Hide all suggestion dropdowns when clicking elsewhere
-    document.querySelectorAll('.suggest-dropdown').forEach(function(el) {
+        document.querySelectorAll('.suggest-dropdown').forEach(function(el) {
         el.classList.add('hidden');
     });
 });
 
-// Show dropdown when suggestions arrive via HTMX
 document.addEventListener('htmx:afterSwap', function(e) {
     if (e.detail.target.classList.contains('suggest-dropdown')) {
         if (e.detail.target.innerHTML.trim()) {
@@ -28,7 +24,6 @@ document.addEventListener('htmx:afterSwap', function(e) {
     }
 });
 
-// Initialize flatpickr on date inputs if available
 document.addEventListener('DOMContentLoaded', function() {
     var dateInputs = document.querySelectorAll('input[type="date"]');
     if (typeof flatpickr !== 'undefined') {
@@ -41,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Fade-in animation for new rows
 var style = document.createElement('style');
 style.textContent = '@keyframes fadeIn { from { opacity: 0; background-color: #dcfce7; } to { opacity: 1; background-color: #f0fdf4; } }';
 document.head.appendChild(style);
